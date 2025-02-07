@@ -70,3 +70,34 @@ Each submission object in the `body` array contains:
 - **`seat`** (`String`) → Physical seat in location (e.g., seat in Fahmy).  
 - **`delivered`** (`Boolean`) → The accepted submission's balloon status.  
 
+---
+
+
+# API Endpoint: Mark Submission as Delivered  
+**Endpoint:** `POST /deliver`  
+
+## Request Body  
+```json
+{
+   "handle": "string",
+   "problem_index": "string"
+}
+```
+
+### Parameters  
+- **`handle`** (`String`) → The contestant's username.  
+- **`problem_index`** (`String`) → The problem index to mark as delivered.  
+
+## Response Format  
+```json
+{
+   "statusCode": 200,
+   "message": "Success",
+   "body": null
+}
+```
+
+## Response Schema  
+- **`statusCode`** (`Integer`) → HTTP response status code.  
+- **`message`** (`String`) → Descriptive message about the request status.  
+- **`body`** → null
