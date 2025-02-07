@@ -3,37 +3,34 @@
 
 ## Query Parameters  
 ### Required Parameters  
-- **`hall`** (`String`, Enum: `Fahmy`, `Tolba`) → Specifies the hall from which to fetch submissions.  
+- **`location`** (`String`, Enum: `Fahmy`, `Saeed`) → Specifies the physical contest location (lab/hall) from which to fetch submissions.  
 
 ### Optional Parameters  
-- **`new`** (`Boolean`, Default: `false`) → If `true`, fetches new submissions after `startFrom`. If `false`, fetches all contest submissions.  
-- **`startFrom`** (`Integer`, Required if `new=true`) → The submission ID after which to fetch new submissions.  
+- **`new`** (`Boolean`, Default: `false`) → If `true`, fetches new submissions after refresh or page initialization. If `false`, fetches all contest submissions.  
 
 ## Behavior  
-- If `new=false` (default): Returns **all contest submissions** from the specified hall.  
-- If `new=true`:  
-  - Requires `startFrom` to be specified.  
-  - Returns **only new submissions** after `startFrom`.  
+- If `new=false` (default): Returns **all contest accepted submissions** from the specified location.  
+- If `new=true`: Returns **all NEW contest accepted submissions** from the specified location (i.e., submissions retrieved after hitting refresh or page initialization).  
 
 ## Example Requests  
 ### Get all submissions from Hall Fahmy:  
 ```http
-GET /submissions?new=false&hall=Fahmy
+GET /submissions?new=false&location=Fahmy
 ```  
 
-### Get new submissions from Hall Fahmy after submission ID `12345`:  
+### Get new submissions from Hall Fahmy:  
 ```http
-GET /submissions?new=true&startFrom=12345&hall=Fahmy
+GET /submissions?new=true&location=Fahmy
 ```  
 
 ### Get all submissions from Hall Saeed:  
 ```http
-GET /submissions?new=false&hall=Saeed
+GET /submissions?new=false&location=Saeed
 ```  
 
-### Get new submissions from Hall Saeed after submission ID `12345`:  
+### Get new submissions from Hall Saeed:  
 ```http
-GET /submissions?new=true&startFrom=12345&hall=Saeed
+GET /submissions?new=true&location=Saeed
 ```  
 
 ## Response Format  
@@ -45,12 +42,16 @@ GET /submissions?new=true&startFrom=12345&hall=Saeed
        {
            "id": 123,
            "handle": "mohanad",
-           "problem_index": "A"
+           "problem_index": "A",
+           "seat": "1, 3",
+           "delivered": false
        },
        {
            "id": 124,
            "handle": "adham",
-           "problem_index": "D2"
+           "problem_index": "D2",
+           "seat": "1, 2",
+           "delivered": true
        }
    ]
 }
@@ -63,10 +64,9 @@ GET /submissions?new=true&startFrom=12345&hall=Saeed
 
 ### Submission Schema  
 Each submission object in the `body` array contains:  
-- **`id`** (`Integer`) → Submission ID
+- **`id`** (`Integer`) → Submission ID.  
 - **`handle`** (`String`) → Contestant's username.  
 - **`problem_index`** (`String`) → Problem identifier.  
-
-## Notes   
-- If `new=false`, `startFrom` is ignored, and all submissions are returned.  
+- **`seat`** (`String`) → Physical seat in location (e.g., seat in Fahmy).  
+- **`delivered`** (`Boolean`) → The accepted submission's balloon status.  
 
