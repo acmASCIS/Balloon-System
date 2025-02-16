@@ -1,0 +1,29 @@
+{
+  "name": "codeforces-balloon-utility",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node build/index.js",
+    "build": "tsc",
+    "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MohanadKh03/balloon-contest.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MohanadKh03/balloon-contest/issues"
+  },
+  "homepage": "https://github.com/MohanadKh03/balloon-contest#readme",
+  "description": "",
+  "dependencies": {
+    "@acm-ascis/codeforces-client": "^0.0.4",
+    "@types/express": "^5.0.0",
+    "express": "^4.21.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
+  }
+}
