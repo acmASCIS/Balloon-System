@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const controller_submissions_1 = __importDefault(require("./controller/controller.submissions"));
+const PORT = 3000;
 const app = (0, express_1.default)();
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
+app.use("/", controller_submissions_1.default);
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
