@@ -1,19 +1,9 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import * as xlsx from "xlsx";
+import { Contestant } from "./model/model.contestant"; // Update the import statement
 
 dotenv.config();
-
-// Define MongoDB Schema
-const ContestantSchema = new mongoose.Schema({
-    handle: { type: String, required: true },
-    delivered_problems: { type: [Number], default: [] },
-    seat: { type: String, required: true },
-    location: { type: String, required: true }
-});
-
-// Create Mongoose Model
-const Contestant = mongoose.model("Contestants", ContestantSchema);
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || "";

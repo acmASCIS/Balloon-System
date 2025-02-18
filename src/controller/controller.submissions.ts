@@ -2,30 +2,24 @@ import express, { Request, Response } from "express";
 import { ApiResponse } from "../api.response";
 import codeforcesClient from "../config";
 import { Submission } from "../model/model.submission";
+import { Contestant } from "../model/model.contestant"; // Import the Contestant model
 
 let router = express.Router();
 
 router.get("/submissions/:contestId", async (req: Request, res: Response) => {
     try {
         let contestId = req.params.contestId;
-        let newParam = req.query.new === 'true';
         let locationParam = req.query.location;
         
-        if (newParam === undefined) {
-            newParam = false;
-        }
+        
         
         if(!contestId) {
             throw new Error("Contest ID is required");
         }
 
-        if(locationParam) {
-            // make sure the location is valid ==> in the enum
-        }
-
-        let codeforcesResponse = await codeforcesClient.contest.status({ contestId });
-
-
+        
+        let codeforcesResponse: any = await codeforcesClient.contest.status({ contestId });
+        
         // filter the submissions by the accepted submissions
         codeforcesResponse.result = codeforcesResponse.result.filter((submission) => submission.verdict === "OK");
         
@@ -36,19 +30,28 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
                 s.author.members[0].handle === submission.author.members[0].handle && s.problem.index === submission.problem.index
             ))
         );
-
-        // get the seat and delivered for all handles and their problems AND THEIR LOCATION
         
-
-        let convertedSubmissions: Submission[] = codeforcesResponse.result.map((submission) => {
+        if(locationParam) {
+            // filter contestants by thier location 
+            codeforcesResponse.result = await Promise.all(codeforcesResponse.result.filter(async (submission) => {
+                const handle = submission.author.members[0].handle;
+                const contestant = await Contestant.findOne({ handle });
+                return contestant && contestant.location === locationParam;
+            }));
+        }
+        // get the seat and delivered for all handles and their problems AND THEIR LOCATION
+        let convertedSubmissions: Submission[] = await Promise.all(codeforcesResponse.result.map(async (submission) => {
+            const handle = submission.author.members[0].handle;
+            const problemIndex = submission.problem.index;
+            const contestant = await Contestant.findOne({ handle });
             return {
                 id: submission.id,
-                handle: submission.author.members[0].handle,
-                problem_index: submission.problem.index,
-                seat: "random seat", // You need to provide logic to determine the seat
-                delivered: false // Assuming new submissions are not delivered
+                handle: handle,
+                problem_index: problemIndex,
+                seat: contestant ? contestant.seat : 'unknown seat', // Get the seat of the handle from the database
+                delivered: contestant ? contestant.delivered_problems.includes(problemIndex) : false // Check if delivered from the database
             };
-        });
+        }));
 
         let response: ApiResponse<any> = {
             statusCode: 200,
@@ -66,7 +69,7 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
     }
 });
 
-router.post("/deliver", (req: Request, res: Response) => {
+router.post("/deliver", async (req: Request, res: Response) => {
     let { handle, problem_index } = req.body;
     if(!handle || !problem_index) {
         res.status(400).json({
@@ -76,9 +79,26 @@ router.post("/deliver", (req: Request, res: Response) => {
         });
         return;
     }
-    // deliver the submission with the given handle and problem index in the database
 
+    try {
+        // Update the delivered status in the database
+        await Contestant.updateOne(
+            { handle },
+            { $addToSet: { delivered_problems: problem_index } }
+        );
+
+        res.status(200).json({
+            statusCode: 200,
+            message: "Submission delivered successfully",
+            data: null
+        });
+    } catch (error) {
+        res.status(500).json({
+            statusCode: 500,
+            message: error.message,
+            data: null
+        });
+    }
 });
-
 
 export default router;
