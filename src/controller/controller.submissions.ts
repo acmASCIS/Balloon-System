@@ -33,7 +33,12 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
             ))
         );
 
-        const locationContestants = await Contestant.find({ location: "Fahmy Tolba" });
+        
+        //for testing purposes
+        // const locationContestants = await Contestant.find({ location: "Fahmy Tolba" });
+
+
+        const locationContestants = await Contestant.find({ location: locationParam });
         
 
         // filter contestants by thier location 
@@ -73,6 +78,7 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
 });
 
 router.post("/deliver", async (req: Request, res: Response) => {
+    
     let { handle, problem_index } = req.body;
     if(!handle || !problem_index) {
         res.status(400).json({
@@ -96,6 +102,8 @@ router.post("/deliver", async (req: Request, res: Response) => {
             data: null
         });
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json({
             statusCode: 500,
             message: error.message,

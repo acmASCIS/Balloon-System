@@ -16,7 +16,7 @@ export default function ProblemsDashboard() {
     
     const fetchSubmissions = async () => {
         try {
-            const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}`);
+            const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}?location=${formData.location}`);
             console.log(response);
             const submissions = response.data.data;
 
@@ -37,17 +37,19 @@ export default function ProblemsDashboard() {
 
     const handleCheckboxChange = async (id) => {
         const rowToMove = pendingRows.find((row) => row.id === id);
+        console.log(rowToMove);
+        
         if (rowToMove) {
             try {
-                // Send a POST request to the API to mark the submission as delivered
-                await axios.post('/deliver', {
-                    handle: rowToMove.handle,
-                    problem_index: rowToMove.problem_index
-                });
-
                 // Update the state to move the submission from pendingRows to deliveredRows
                 setPendingRows((prevRows) => prevRows.filter((row) => row.id !== id));
                 setDeliveredRows((prevDelivered) => [...prevDelivered, { ...rowToMove, delivered: true }]);
+                
+                // Send a POST request to the API to mark the submission as delivered
+                await axios.post('http://localhost:3000/deliver', {
+                    handle: rowToMove.handle,
+                    problem_index: rowToMove.problem_index
+                });
             } catch (error) {
                 console.error("Error delivering submission:", error);
             }
@@ -55,9 +57,19 @@ export default function ProblemsDashboard() {
     };
 
     const columns = [
-        { field: "name", headerName: "Name", flex: 1 },
-        { field: "problemIndex", headerName: "Problem Index", flex: 1 },
-        { field: "problemColor", headerName: "Problem Color", flex: 1 },
+        { field: "handle", headerName: "Name", flex: 1 },
+        { field: "problem_index", headerName: "Problem Index", flex: 1 },
+        {
+            field: "problemColor",
+            headerName: "Problem Color",
+            flex: 1,
+            renderCell: (params) => {
+                if (!params.row || !formData?.problems) return "unknown color";
+                
+                const problem = formData.problems.find(p => p.problemIndex === params.row.problem_index);
+                return problem ? problem.problemColor : "unknown color";
+            },
+        },
         { field: "seat", headerName: "Seat", flex: 1 },
         {
             field: "delivered",

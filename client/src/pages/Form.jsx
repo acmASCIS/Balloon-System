@@ -12,7 +12,6 @@ export default function Form(){
         location: "",
         problems: [{ problemIndex: "", problemColor: "" }], 
         contestId: "",
-        groupId: "",
     });
 
     const handleChange = (e) => {
@@ -95,14 +94,7 @@ export default function Form(){
                 required
             />
 
-            <TextField
-                label="Group ID"
-                name="groupId"
-                type="text"
-                value={formData.groupId}
-                onChange={handleChange}
-                required
-            />
+            
 
             <Button type="submit" variant="contained" color="primary">
                 Submit
