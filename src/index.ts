@@ -3,6 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import router from "./controller/controller.submissions";
+import cors from "cors";
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const MONGO_URI = process.env.MONGO_URI || "";
 
 const app = express();
 
+app.use(cors({ origin: '*' }));
 // MongoDB Connection
 async function connectDB() {
     try {

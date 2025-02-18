@@ -16,7 +16,8 @@ export default function ProblemsDashboard() {
     
     const fetchSubmissions = async () => {
         try {
-            const response = await axios.get(`/submissions/${formData.contestId}`);
+            const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}`);
+            console.log(response);
             const submissions = response.data.data;
 
             // Separate submissions into pending and delivered

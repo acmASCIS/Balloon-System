@@ -3,6 +3,7 @@ import { ApiResponse } from "../api.response";
 import codeforcesClient from "../config";
 import { Submission } from "../model/model.submission";
 import { Contestant } from "../model/model.contestant"; // Import the Contestant model
+import { FAHMY, SAEED } from "../constants/location";
 
 let router = express.Router();
 
@@ -11,12 +12,13 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
         let contestId = req.params.contestId;
         let locationParam = req.query.location;
         
-        
-        
         if(!contestId) {
             throw new Error("Contest ID is required");
         }
 
+        if(locationParam && locationParam !== FAHMY && locationParam !== SAEED) {
+            throw new Error("Invalid location");
+        }
         
         let codeforcesResponse: any = await codeforcesClient.contest.status({ contestId });
         
@@ -30,20 +32,21 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
                 s.author.members[0].handle === submission.author.members[0].handle && s.problem.index === submission.problem.index
             ))
         );
+
+        const locationContestants = await Contestant.find({ location: "Fahmy Tolba" });
         
-        if(locationParam) {
-            // filter contestants by thier location 
-            codeforcesResponse.result = await Promise.all(codeforcesResponse.result.filter(async (submission) => {
-                const handle = submission.author.members[0].handle;
-                const contestant = await Contestant.findOne({ handle });
-                return contestant && contestant.location === locationParam;
-            }));
-        }
+
+        // filter contestants by thier location 
+        codeforcesResponse.result = codeforcesResponse.result.filter((submission) => {
+            const handle = submission.author.members[0].handle;
+            return locationContestants.some(contestant => contestant.handle === handle);
+        });
+
         // get the seat and delivered for all handles and their problems AND THEIR LOCATION
-        let convertedSubmissions: Submission[] = await Promise.all(codeforcesResponse.result.map(async (submission) => {
+        let convertedSubmissions: Submission[] = codeforcesResponse.result.map((submission) => {
             const handle = submission.author.members[0].handle;
             const problemIndex = submission.problem.index;
-            const contestant = await Contestant.findOne({ handle });
+            const contestant = locationContestants.find(contestant => contestant.handle === handle);
             return {
                 id: submission.id,
                 handle: handle,
@@ -51,7 +54,7 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
                 seat: contestant ? contestant.seat : 'unknown seat', // Get the seat of the handle from the database
                 delivered: contestant ? contestant.delivered_problems.includes(problemIndex) : false // Check if delivered from the database
             };
-        }));
+        });
 
         let response: ApiResponse<any> = {
             statusCode: 200,

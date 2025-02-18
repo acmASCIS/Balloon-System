@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextField, Button, MenuItem, Box, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
+import { FAHMY, SAEED } from "../constants/location";
 
 export default function Form(){
 
@@ -55,8 +56,8 @@ export default function Form(){
                 onChange={handleChange}
                 required
             >
-                <MenuItem value="fahmy">Fahmy</MenuItem>
-                <MenuItem value="saeed">Saeed</MenuItem>
+                <MenuItem value={ FAHMY }>Fahmy</MenuItem>
+                <MenuItem value={ SAEED }>Saeed</MenuItem>
             </TextField>
 
             {formData.problems.map((problem, index) => (
