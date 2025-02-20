@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node build/index.js",
-    "import": "tsc contestants-importer.ts --outDir build && node build/contestants-importer.js",
+    "import": "tsc src/contestants-importer.ts --outDir build && node build/contestants-importer.js",
     "build": "tsc",
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,6 +23,7 @@
   "dependencies": {
     "@acm-ascis/codeforces-client": "^0.0.4",
     "@types/express": "^5.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^8.10.1",

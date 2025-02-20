@@ -1,19 +1,9 @@
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import * as xlsx from "xlsx";
+import { Contestant } from "./model/model.contestant"; // Update the import statement
 
 dotenv.config();
-
-// Define MongoDB Schema
-const ContestantSchema = new mongoose.Schema({
-    handle: { type: String, required: true },
-    delivered_problems: { type: [Number], default: [] },
-    seat: { type: String, required: true },
-    location: { type: String, required: true }
-});
-
-// Create Mongoose Model
-const Contestant = mongoose.model("Contestants", ContestantSchema);
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || "";
@@ -36,7 +26,7 @@ async function connectDB() {
 }
 
 // Load Excel file
-const workbook = xlsx.readFile("Level 1 contest T-T.xlsx"); // Change filename if needed
+const workbook = xlsx.readFile("level1contest.xlsx"); // Change filename if needed
 
 // Process all sheets
 const allContestants: any[] = [];
@@ -46,13 +36,14 @@ for (const sheetName of workbook.SheetNames) {
     const data: any[] = xlsx.utils.sheet_to_json(sheet);
 
     const contestants = data.map(row => ({
-        handle: row["Codeforces handle"],
+        handle: row["Codeforces Handle"],
         delivered_problems: [],
-        seat: `${row["Bench(from front to back)"]}, ${row["Position(from left to right)"]}`,
+        seat: `${row["Bench (down to up)"]}, ${row["Position (right to left)"]}`,
         location: row["Hall"]
     }));
 
     allContestants.push(...contestants);
+    break; 
 }
 
 // Save data to MongoDB
@@ -62,7 +53,7 @@ async function saveData() {
             console.log("No data found in the Excel file.");
             return;
         }
-
+        await Contestant.deleteMany({});
         await Contestant.insertMany(allContestants);
         console.log("Data imported successfully!");
     } catch (error) {

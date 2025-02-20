@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextField, Button, MenuItem, Box, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
+import { FAHMY, SAEED } from "../constants/location";
 
 export default function Form(){
 
@@ -11,7 +12,6 @@ export default function Form(){
         location: "",
         problems: [{ problemIndex: "", problemColor: "" }], 
         contestId: "",
-        groupId: "",
     });
 
     const handleChange = (e) => {
@@ -55,8 +55,8 @@ export default function Form(){
                 onChange={handleChange}
                 required
             >
-                <MenuItem value="fahmy">Fahmy</MenuItem>
-                <MenuItem value="saeed">Saeed</MenuItem>
+                <MenuItem value={ FAHMY }>Fahmy</MenuItem>
+                <MenuItem value={ SAEED }>Saeed</MenuItem>
             </TextField>
 
             {formData.problems.map((problem, index) => (
@@ -94,14 +94,7 @@ export default function Form(){
                 required
             />
 
-            <TextField
-                label="Group ID"
-                name="groupId"
-                type="text"
-                value={formData.groupId}
-                onChange={handleChange}
-                required
-            />
+            
 
             <Button type="submit" variant="contained" color="primary">
                 Submit
