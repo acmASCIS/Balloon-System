@@ -4,7 +4,9 @@ import { Checkbox } from "@mui/material";
 import { Button } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useLocation } from "react-router-dom";
-import axios from "axios"; 
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ProblemsDashboard() {
     const location = useLocation();
@@ -48,8 +50,13 @@ export default function ProblemsDashboard() {
                 // Update the state to move the submission from pendingRows to deliveredRows
                 setPendingRows((prevRows) => prevRows.filter((row) => row.id !== id));
                 setDeliveredRows((prevDelivered) => [...prevDelivered, { ...rowToMove, delivered: true }]);
+
+                // Show success toast
+                toast.success("Submission delivered successfully!");
             } catch (error) {
                 console.error("Error delivering submission:", error);
+                // Show error toast
+                toast.error("Error delivering submission.");
             }
         }
     };
@@ -67,8 +74,13 @@ export default function ProblemsDashboard() {
                 // Update the state to move the submission from deliveredRows to pendingRows
                 setDeliveredRows((prevRows) => prevRows.filter((row) => row.id !== id));
                 setPendingRows((prevPending) => [...prevPending, { ...rowToMove, delivered: false }]);
+
+                // Show success toast
+                toast.success("Submission undelivered successfully!");
             } catch (error) {
                 console.error("Error undelivering submission:", error);
+                // Show error toast
+                toast.error("Error undelivering submission.");
             }
         }
     };
@@ -128,6 +140,11 @@ export default function ProblemsDashboard() {
 
     return (
         <div style={{ padding: "30px 80px" }}>
+            <ToastContainer />
+            <div style={{ position: "sticky", top: 0, backgroundColor: "white", zIndex: 1, padding: "10px", borderBottom: "1px solid #ccc" }}>
+                <p>Note: "seat 4, 5" means the fourth bench from the front of the hall and fifth position from the right.</p>
+                <p>البنش الرابع و ضهرك للسبورة و المكان الخامس من اليمين</p>
+            </div>
             <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <h2>Pending Problems</h2>
