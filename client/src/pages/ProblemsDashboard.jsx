@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress for loading spinner
 
 export default function ProblemsDashboard() {
     const location = useLocation();
@@ -14,9 +15,11 @@ export default function ProblemsDashboard() {
 
     const [pendingRows, setPendingRows] = useState([]);
     const [deliveredRows, setDeliveredRows] = useState([]);
+    const [loading, setLoading] = useState(false); // State variable to track loading state
 
     // Function to fetch submissions data from the backend API
     const fetchSubmissions = async () => {
+        setLoading(true); // Set loading state to true
         try {
             const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}?location=${formData.location}`);
             console.log(response);
@@ -30,6 +33,8 @@ export default function ProblemsDashboard() {
             setDeliveredRows(delivered);
         } catch (error) {
             console.error("Error fetching submissions:", error);
+        } finally {
+            setLoading(false); // Set loading state to false
         }
     };
 
@@ -156,11 +161,23 @@ export default function ProblemsDashboard() {
                         Refresh
                     </Button>
                 </div>
-                <DataGrid rows={pendingRows} columns={columns} />
+                {loading ? (
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100px" }}>
+                        <CircularProgress />
+                    </div>
+                ) : (
+                    <DataGrid rows={pendingRows} columns={columns} />
+                )}
             </div>
             <div>
                 <h2>Delivered Problems</h2>
-                <DataGrid rows={deliveredRows} columns={deliveredColumns} />
+                {loading ? (
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100px" }}>
+                        <CircularProgress />
+                    </div>
+                ) : (
+                    <DataGrid rows={deliveredRows} columns={deliveredColumns} />
+                )}
             </div>
         </div>
     );
