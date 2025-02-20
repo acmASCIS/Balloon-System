@@ -13,7 +13,7 @@ export default function ProblemsDashboard() {
     const [pendingRows, setPendingRows] = useState([]);
     const [deliveredRows, setDeliveredRows] = useState([]);
 
-    
+    // Function to fetch submissions data from the backend API
     const fetchSubmissions = async () => {
         try {
             const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}?location=${formData.location}`);
@@ -37,21 +37,38 @@ export default function ProblemsDashboard() {
 
     const handleCheckboxChange = async (id) => {
         const rowToMove = pendingRows.find((row) => row.id === id);
-        console.log(rowToMove);
-        
         if (rowToMove) {
             try {
-                // Update the state to move the submission from pendingRows to deliveredRows
-                setPendingRows((prevRows) => prevRows.filter((row) => row.id !== id));
-                setDeliveredRows((prevDelivered) => [...prevDelivered, { ...rowToMove, delivered: true }]);
-                
                 // Send a POST request to the API to mark the submission as delivered
                 await axios.post('http://localhost:3000/deliver', {
                     handle: rowToMove.handle,
                     problem_index: rowToMove.problem_index
                 });
+
+                // Update the state to move the submission from pendingRows to deliveredRows
+                setPendingRows((prevRows) => prevRows.filter((row) => row.id !== id));
+                setDeliveredRows((prevDelivered) => [...prevDelivered, { ...rowToMove, delivered: true }]);
             } catch (error) {
                 console.error("Error delivering submission:", error);
+            }
+        }
+    };
+
+    const handleUndeliverCheckboxChange = async (id) => {
+        const rowToMove = deliveredRows.find((row) => row.id === id);
+        if (rowToMove) {
+            try {
+                // Send a POST request to the API to mark the submission as undelivered
+                await axios.post('http://localhost:3000/undeliver', {
+                    handle: rowToMove.handle,
+                    problem_index: rowToMove.problem_index
+                });
+
+                // Update the state to move the submission from deliveredRows to pendingRows
+                setDeliveredRows((prevRows) => prevRows.filter((row) => row.id !== id));
+                setPendingRows((prevPending) => [...prevPending, { ...rowToMove, delivered: false }]);
+            } catch (error) {
+                console.error("Error undelivering submission:", error);
             }
         }
     };
@@ -82,6 +99,31 @@ export default function ProblemsDashboard() {
                 />
             ),
         },
+        {
+            field: "runner",
+            headerName: "Runner",
+            flex: 1,
+            renderCell: (params) => (
+                <input
+                    type="text"
+                />
+            ),
+        },
+    ];
+
+    const deliveredColumns = [
+        ...columns.slice(0, -2),
+        {
+            field: "delivered",
+            headerName: "Delivered",
+            flex: 1,
+            renderCell: (params) => (
+                <Checkbox
+                    checked={params.row.delivered}
+                    onChange={() => handleUndeliverCheckboxChange(params.row.id)}
+                />
+            ),
+        },
     ];
 
     return (
@@ -101,7 +143,7 @@ export default function ProblemsDashboard() {
             </div>
             <div>
                 <h2>Delivered Problems</h2>
-                <DataGrid rows={deliveredRows} columns={columns} />
+                <DataGrid rows={deliveredRows} columns={deliveredColumns} />
             </div>
         </div>
     );

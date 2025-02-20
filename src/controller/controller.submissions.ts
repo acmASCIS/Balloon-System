@@ -112,4 +112,41 @@ router.post("/deliver", async (req: Request, res: Response) => {
     }
 });
 
+
+
+
+router.post("/undeliver", async (req: Request, res: Response) => {
+    
+    let { handle, problem_index } = req.body;
+    if(!handle || !problem_index) {
+        res.status(400).json({
+            statusCode: 400,
+            message: "Handle and problem index are required",
+            data: null
+        });
+        return;
+    }
+
+    try {
+        // Update the delivered status in the database
+        await Contestant.updateOne(
+            { handle },
+            { $pull: { delivered_problems: problem_index } }
+        );
+
+        res.status(200).json({
+            statusCode: 200,
+            message: "Submission delivered successfully",
+            data: null
+        });
+    } catch (error) {
+        console.log(error);
+        
+        res.status(500).json({
+            statusCode: 500,
+            message: error.message,
+            data: null
+        });
+    }
+});
 export default router;

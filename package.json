@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node build/index.js",
-    "import": "tsc contestants-importer.ts --outDir build && node build/contestants-importer.js",
+    "import": "tsc src/contestants-importer.ts --outDir build && node build/contestants-importer.js",
     "build": "tsc",
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"

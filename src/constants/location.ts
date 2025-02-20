@@ -1,2 +1,2 @@
-export const FAHMY = "FAHMY";
-export const SAEED = "SAEED";
+export const FAHMY = "Fahmy";
+export const SAEED = "Saeed";
