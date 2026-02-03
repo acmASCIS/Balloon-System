@@ -82,4 +82,5 @@ npm run dev
   2. Set up the `.env` file with `MONGO_URI`.
   3. Run the script: `npx ts-node src/contestants-importer.ts` (from the server directory).
 
+
 Once both the server and client are running, open the client in your browser and follow the interface to manage balloon deliveries for a contest.
