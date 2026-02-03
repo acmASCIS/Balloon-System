@@ -26,7 +26,7 @@ async function connectDB() {
 }
 
 // Load Excel file
-const workbook = xlsx.readFile("level1contest.xlsx"); // Change filename if needed
+const workbook = xlsx.readFile("lvl1.xlsx"); // Change filename if needed
 
 // Process all sheets
 const allContestants: any[] = [];
@@ -43,7 +43,7 @@ for (const sheetName of workbook.SheetNames) {
     }));
 
     allContestants.push(...contestants);
-    break; 
+    // break; 
 }
 
 // Save data to MongoDB

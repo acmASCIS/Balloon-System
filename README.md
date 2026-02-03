@@ -73,6 +73,13 @@ npm run dev
 ├── README.md # Project documentation
 ```
 
-## Usage
+### Server Files
+
+- `server/src/contestants-importer.ts`: A utility script for importing contestant data from an Excel file into the MongoDB database. It reads contestant information such as Codeforces handles, seat positions, and locations from a spreadsheet (default: `lvl1.xlsx`), processes the data, and inserts it into the database after clearing any existing contestant records.
+
+  **How to use:**
+  1. Ensure the Excel file (e.g., `lvl1.xlsx`) is in the `server` directory with columns for "Codeforces Handle", "Bench (down to up)", "Position (right to left)", and "Hall".
+  2. Set up the `.env` file with `MONGO_URI`.
+  3. Run the script: `npx ts-node src/contestants-importer.ts` (from the server directory).
 
 Once both the server and client are running, open the client in your browser and follow the interface to manage balloon deliveries for a contest.
