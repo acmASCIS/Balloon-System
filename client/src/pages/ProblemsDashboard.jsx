@@ -105,6 +105,7 @@ export default function ProblemsDashboard() {
                 return problem ? problem.problemColor : "unknown color";
             },
         },
+        { field: "location", headerName: "Location", flex: 1 },
         { field: "seat", headerName: "Seat", flex: 1 },
         {
             field: "delivered",

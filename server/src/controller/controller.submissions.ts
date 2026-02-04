@@ -17,13 +17,25 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
         }
 
         let locationIds: any[] = [];
+        let locationMap: { [key: string]: string } = {}; // Map location IDs to names
+        
         if (locationsParam) {
-            const locationNames = Array.isArray(locationsParam) ? locationsParam : [locationsParam];
-            const locations = await Location.find({ name: { $in: locationNames }, isActive: true });
+            const locationIdParams = Array.isArray(locationsParam) ? locationsParam : [locationsParam];
+            const locations = await Location.find({ _id: { $in: locationIdParams }, isActive: true });
             locationIds = locations.map(loc => loc._id);
+            // Create a map of location IDs to names
+            locations.forEach(loc => {
+                locationMap[loc._id.toString()] = loc.name;
+            });
             if (locationIds.length === 0) {
                 throw new Error("No valid locations found");
             }
+        } else {
+            // If no locations selected, fetch all and create a map
+            const allLocations = await Location.find({ isActive: true });
+            allLocations.forEach(loc => {
+                locationMap[loc._id.toString()] = loc.name;
+            });
         }
         
         let codeforcesResponse: any = await codeforcesClient.contest.status({ contestId });
@@ -44,7 +56,7 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
         // const locationContestants = await Contestant.find({ location: "Fahmy Tolba" });
 
 
-        const locationContestants = locationIds.length > 0 ? await Contestant.find({ location: { $in: locationIds } }).populate('location') : await Contestant.find().populate('location');
+        const locationContestants = locationIds.length > 0 ? await Contestant.find({ location: { $in: locationIds } }) : await Contestant.find();
         
 
         // filter contestants by thier location 
@@ -58,11 +70,13 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
             const handle = submission.author.members[0].handle;
             const problemIndex = submission.problem.index;
             const contestant = locationContestants.find(contestant => contestant.handle === handle);
+            const locationName = contestant ? locationMap[contestant.location.toString()] || 'unknown location' : 'unknown location';
             return {
                 id: submission.id,
                 handle: handle,
                 problem_index: problemIndex,
                 seat: contestant ? contestant.seat : 'unknown seat', // Get the seat of the handle from the database
+                location: locationName, // Get the location name
                 delivered: contestant ? contestant.delivered_problems.includes(problemIndex) : false // Check if delivered from the database
             };
         });
