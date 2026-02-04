@@ -21,7 +21,8 @@ export default function ProblemsDashboard() {
     const fetchSubmissions = async () => {
         setLoading(true); // Set loading state to true
         try {
-            const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}?location=${formData.location}`);
+            const locationQuery = formData.locations.map(id => `locations=${id}`).join('&');
+            const response = await axios.get(`http://localhost:3000/submissions/${formData.contestId}?${locationQuery}`);
             console.log(response);
             const submissions = response.data.data;
 

@@ -3,21 +3,27 @@ import { ApiResponse } from "../api.response";
 import codeforcesClient from "../config";
 import { Submission } from "../model/model.submission";
 import { Contestant } from "../model/model.contestant"; // Import the Contestant model
-import { FAHMY, SAEED } from "../constants/location";
+import { Location } from "../model/model.location"; // Import Location model
 
 let router = express.Router();
 
 router.get("/submissions/:contestId", async (req: Request, res: Response) => {
     try {
         let contestId = req.params.contestId;
-        let locationParam = req.query.location;
+        let locationsParam = req.query.locations;
         
         if(!contestId) {
             throw new Error("Contest ID is required");
         }
 
-        if(locationParam && locationParam !== FAHMY && locationParam !== SAEED) {
-            throw new Error("Invalid location");
+        let locationIds: any[] = [];
+        if (locationsParam) {
+            const locationNames = Array.isArray(locationsParam) ? locationsParam : [locationsParam];
+            const locations = await Location.find({ name: { $in: locationNames }, isActive: true });
+            locationIds = locations.map(loc => loc._id);
+            if (locationIds.length === 0) {
+                throw new Error("No valid locations found");
+            }
         }
         
         let codeforcesResponse: any = await codeforcesClient.contest.status({ contestId });
@@ -38,7 +44,7 @@ router.get("/submissions/:contestId", async (req: Request, res: Response) => {
         // const locationContestants = await Contestant.find({ location: "Fahmy Tolba" });
 
 
-        const locationContestants = await Contestant.find({ location: locationParam });
+        const locationContestants = locationIds.length > 0 ? await Contestant.find({ location: { $in: locationIds } }).populate('location') : await Contestant.find().populate('location');
         
 
         // filter contestants by thier location 
@@ -149,4 +155,22 @@ router.post("/undeliver", async (req: Request, res: Response) => {
         });
     }
 });
+
+router.get("/locations", async (req: Request, res: Response) => {
+    try {
+        const locations = await Location.find({ isActive: true });
+        res.status(200).json({
+            statusCode: 200,
+            message: "Locations retrieved successfully",
+            data: locations
+        });
+    } catch (error) {
+        res.status(500).json({
+            statusCode: 500,
+            message: error.message,
+            data: null
+        });
+    }
+});
+
 export default router;

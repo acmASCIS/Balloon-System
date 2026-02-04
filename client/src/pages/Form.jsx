@@ -1,21 +1,38 @@
-import React, { useState } from "react";
-import { TextField, Button, MenuItem, Box, IconButton } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { TextField, Button, MenuItem, Box, IconButton, Select, InputLabel, FormControl, Chip } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
-import { FAHMY, SAEED } from "../constants/location";
+import axios from "axios";
 
 export default function Form(){
 
     const navigate = useNavigate();
+    const [locations, setLocations] = useState([]);
 
     const [formData, setFormData] = useState({
-        location: "",
+        locations: [],
         problems: [{ problemIndex: "", problemColor: "" }], 
         contestId: "",
     });
 
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const response = await axios.get("http://localhost:3000/locations");
+                setLocations(response.data.data);
+            } catch (error) {
+                console.error("Error fetching locations:", error);
+            }
+        };
+        fetchLocations();
+    }, []);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleLocationChange = (event) => {
+        setFormData({ ...formData, locations: event.target.value });
     };
 
     const handleProblemChange = (index, field, value) => {
@@ -47,17 +64,28 @@ export default function Form(){
             sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 500, padding:"30px 80px"}}
         >
 
-            <TextField
-                select
-                label="Location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-            >
-                <MenuItem value={ FAHMY }>Fahmy</MenuItem>
-                <MenuItem value={ SAEED }>Saeed</MenuItem>
-            </TextField>
+            <FormControl fullWidth required>
+                <InputLabel>Location</InputLabel>
+                <Select
+                    multiple
+                    name="locations"
+                    value={formData.locations}
+                    onChange={handleLocationChange}
+                    renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {selected.map((value) => (
+                                <Chip key={value} label={locations.find(loc => loc._id === value)?.name || value} />
+                            ))}
+                        </Box>
+                    )}
+                >
+                    {locations.map((location) => (
+                        <MenuItem key={location._id} value={location._id}>
+                            {location.name}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
             {formData.problems.map((problem, index) => (
                 <Box key={index} sx={{ display: "flex", gap: 2, alignItems: "center" }}>

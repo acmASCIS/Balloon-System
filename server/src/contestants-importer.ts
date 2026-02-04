@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import * as xlsx from "xlsx";
 import { Contestant } from "./model/model.contestant"; // Update the import statement
+import { Location } from "./model/model.location"; // Add Location import
 
 dotenv.config();
 
@@ -26,26 +27,47 @@ async function connectDB() {
 }
 
 // Load Excel file
-const workbook = xlsx.readFile("lvl1.xlsx"); // Change filename if needed
+const workbook = xlsx.readFile("Level 1 contest.xlsx"); // Change filename if needed
 
 
 // Process all sheets
 const allContestants: any[] = [];
 
-for (const sheetName of workbook.SheetNames) {
-    const sheet = workbook.Sheets[sheetName];
-    const data: any[] = xlsx.utils.sheet_to_json(sheet);
+async function processSheets() {
+    for (const sheetName of workbook.SheetNames) {
+        const sheet = workbook.Sheets[sheetName];
+        const data: any[] = xlsx.utils.sheet_to_json(sheet);
 
-    const contestants = data.map(row => ({
-        handle: row["Codeforces Handle"],
-        delivered_problems: [],
-        seat: `${row["Bench (down to up)"]}, ${row["Position (right to left)"]}`,
-        location: row["Hall"]
-    }));
+        for (const row of data) {
+            const hallName = row["Hall"];
+            const sequenceNumber = row["Sequence Number"] - 1; // Convert to 0-based for calculation
+            
+            let locationDoc = await Location.findOne({ name: hallName });
+            if (!locationDoc) {
+                locationDoc = new Location({ name: hallName });
+                await locationDoc.save();
+                console.log(`Created new location: ${hallName}`);
+            }
 
-    allContestants.push(...contestants);
-    // break; 
+            let seat = row["Sequence Number"].toString();
+            
+            // If location is Hall1, calculate bench and position from sequence number
+            if (hallName === "Hall 1") {
+                const bench = Math.floor(sequenceNumber / 5) + 1;
+                const position = (sequenceNumber % 5) + 1;
+                seat = `${bench}, ${position}`;
+            }
 
+            const contestant = {
+                handle: row["Codeforces Handle"],
+                delivered_problems: [],
+                seat: seat,
+                location: locationDoc._id
+            };
+
+            allContestants.push(contestant);
+        }
+    }
 }
 
 // Save data to MongoDB
@@ -68,5 +90,6 @@ async function saveData() {
 // Run the script
 (async () => {
     await connectDB();
+    await processSheets();
     await saveData();
 })();
