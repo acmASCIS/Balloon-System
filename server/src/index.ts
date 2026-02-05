@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import router from "./controller/controller.submissions";
 import cors from "cors";
+import importContestants from "./contestants-importer";
 
 dotenv.config();
 
@@ -34,10 +35,12 @@ async function connectDB() {
 }
 
 // Connect to the database before starting the server
-connectDB().then(() => {
-    app.use("/", router);
+connectDB()
+    .then(() => importContestants())
+    .then(() => {
+        app.use("/", router);
 
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
+        app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
     });
-});

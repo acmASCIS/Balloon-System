@@ -1,6 +1,8 @@
 import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import * as xlsx from "xlsx";
+import * as path from "path";
+import fs from "fs";
 import { Contestant } from "./model/model.contestant"; // Update the import statement
 
 dotenv.config();
@@ -26,8 +28,14 @@ async function connectDB() {
 }
 
 // Load Excel file
-const workbook = xlsx.readFile("lvl1.xlsx"); // Change filename if needed
+const folderPath = path.join(process.cwd(), "src", "data");
+const files = fs.readdirSync(folderPath);
 
+const validFile = files.find(file=>file.toLowerCase().endsWith(".xlsx"));
+
+const filePath = path.join(folderPath, validFile);
+
+const workbook = xlsx.readFile(filePath); // Change filename if needed
 
 // Process all sheets
 const allContestants: any[] = [];
@@ -66,7 +74,7 @@ async function saveData() {
 }
 
 // Run the script
-(async () => {
+export default async function importContestants() {
     await connectDB();
     await saveData();
-})();
+}
